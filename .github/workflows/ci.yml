@@ -24,8 +24,12 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
           cache: "yarn"
-          cache-dependency-path: "./yarn.lock"
+          cache-dependency-path: "./mobile/yarn.lock"
       - run: yarn install
+        working-directory: mobile
       - run: yarn lint
+        working-directory: mobile
       - run: yarn typecheck
+        working-directory: mobile
       - run: yarn test:unit
+        working-directory: mobile

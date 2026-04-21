@@ -16,12 +16,13 @@ jobs:
         with:
           node-version: 20
           cache: yarn
-          cache-dependency-path: ./yarn.lock
+          cache-dependency-path: ./mobile/yarn.lock
       - name: Detect version change
         id: version
+        working-directory: mobile
         run: |
           CURRENT_VERSION=$(jq -r '.version' package.json)
-          PREVIOUS_VERSION=$(git show HEAD^:package.json 2>/dev/null | jq -r '.version')
+          PREVIOUS_VERSION=$(git show HEAD^:mobile/package.json 2>/dev/null | jq -r '.version')
           echo "current=${CURRENT_VERSION}"
           echo "previous=${PREVIOUS_VERSION}"
           if [ "${CURRENT_VERSION}" != "${PREVIOUS_VERSION}" ]; then
@@ -31,6 +32,7 @@ jobs:
           fi
       - name: Build and submit
         if: steps.version.outputs.changed == 'true'
+        working-directory: mobile
         env:
           EAS_TOKEN: ${{ secrets.EAS_TOKEN }}
         run: ./deploy.sh
