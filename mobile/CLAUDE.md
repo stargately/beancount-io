@@ -1,151 +1,116 @@
-# Beancount Mobile - Claude Documentation
+# Beancount Mobile (CE)
 
-This file contains helpful information about the Beancount Mobile project for Claude Code sessions.
+React Native iOS/Android app for [Beancount.io](https://beancount.io/), built with Expo. Currently the only active package in the monorepo (see root `CLAUDE.md` for repo-wide rules).
 
-## Project Overview
+## Tech stack
 
-Beancount Mobile Community Edition is a React Native app for iOS and Android built with Expo. It's a financial management app that connects to the Beancount.io service.
+- **Framework**: React Native 0.81 + Expo 54
+- **Routing**: Expo Router (file-based, in `app/`)
+- **Data**: Apollo Client 3.13 + GraphQL Code Generator
+- **State**: Apollo reactive variables (no Redux/Zustand)
+- **Forms**: React Hook Form + Zod
+- **Styling**: StyleSheet + custom theme system (light / dark / system)
+- **i18n**: `i18n-js` with 13 locales (en, zh, bg, ca, de, es, fa, fr, nl, pt, ru, sk, uk)
+- **Errors**: Sentry (`@sentry/react-native`)
+- **Analytics**: Custom Mixpanel wrapper (`expo-mixpanel-analytics`)
+- **TypeScript**: strict (`noImplicitAny`, `strictNullChecks`, `noUnusedLocals`, …); path alias `@/*` → `src/*`
 
-## Tech Stack
+## Layout
 
-- **Framework**: React Native with Expo
-- **Navigation**: Expo Router
-- **State Management**: Apollo Client with reactive variables
-- **Styling**: StyleSheet with custom theme system
-- **Internationalization**: i18n-js with translations in 13 languages (English, Chinese, Bulgarian, Catalan, German, Spanish, Persian, French, Dutch, Portuguese, Russian, Slovak, Ukrainian)
-- **Analytics**: Custom Mixpanel integration
-- **Testing**: Use `yarn test` for lint and type checks
-
-## Key Architecture
-
-### Theme System
-
-- Location: `src/common/theme/`, `src/common/providers/theme-provider/`
-- Supports light, dark, and system themes
-- Uses reactive variables for state management
-- Theme provider listens to system appearance changes
-
-### Translations
-
-- Location: `src/translations/`
-- Supported languages: en, zh, bg, ca, de, es, fa, fr, nl, pt, ru, sk, uk
-- **IMPORTANT**: Use `useTranslations()` hook for reactive translations, not `i18n.t()` directly
-- All translation files extend the English base with language-specific overrides
-- Translation hook automatically re-renders components when language changes
-
-### Common Commands
-
-- `yarn test`: Run lint and type checks
-- `yarn lint`: Run the linter
-- `yarn start`: Start development server
-- `yarn codegen`: Generate Apollo GraphQL schema types
-
-## Important Files
-
-### Configuration
-
-- `app.json`: Expo configuration, app version is here
-- `package.json`: Dependencies and scripts
-- `tsconfig.json`: TypeScript configuration
-
-### Key Directories
-
-- `src/screens/`: Screen components
-- `src/components/`: Reusable UI components
-- `src/common/`: Shared utilities, hooks, themes
-- `app/`: Expo Router file-based routing
-
-### Theme-Related
-
-- `src/common/vars/theme.ts`: Theme type definitions and storage
-- `src/common/theme/index.ts`: Theme definitions and system detection
-- `src/common/providers/theme-provider/`: Theme context provider
-
-## Common Patterns
-
-### Accessing Theme
-
-```typescript
-import { useTheme } from "@/common/theme";
-const theme = useTheme().colorTheme;
+```
+mobile/
+  app/                  Expo Router routes (file-based)
+    (app)/              Authenticated tab group
+    auth/               Auth flow
+    _layout.tsx         Root layout (providers)
+    +not-found.tsx
+  src/
+    common/             Shared utilities, hooks, theme, providers, vars
+      apollo/           Apollo client setup
+      hooks/            Reusable hooks (use-translations, use-session, …)
+      providers/        Theme provider, etc.
+      theme/            Theme tokens + system detection
+      vars/             Reactive vars (themeVar, localeVar, …)
+    components/         Reusable UI (button, list, picker, tabs, …)
+    screens/            Screen components mounted from app/ routes
+    translations/       i18n locale files (en is the base; others extend)
+    generated-graphql/  Apollo codegen output — do not hand-edit
+    __tests__/          Unit tests (run by yarn test:unit)
+  fastlane/             iOS App Store metadata
+  scripts/              Build helpers (e.g. jest-lite-runner.js)
 ```
 
-### Using Reactive Variables
+## Common commands
 
-```typescript
+Run all from inside `mobile/`.
+
+| Command | What it does |
+|---------|--------------|
+| `yarn start` | Expo dev server (`--tunnel`) |
+| `yarn ios` / `yarn android` | Start in simulator/emulator |
+| `yarn ios:device` | Build and install on a connected iOS device |
+| `yarn lint` | `tsc --noEmit` + ESLint with autofix |
+| `yarn typecheck` | `tsc --noEmit` only |
+| `yarn test:unit` | Custom Jest-lite runner in `scripts/` |
+| `yarn test` | lint + typecheck + unit tests (CI uses this) |
+| `yarn codegen` | Regenerate `src/generated-graphql/` from the GraphQL schema |
+| `yarn format` / `yarn format:check` | Prettier |
+| `yarn bump` | Bump app version (`package.json` + `app.json`) |
+
+## Conventions
+
+### Theme — always use tokens
+
+Theme tokens come from `src/common/theme/`; the provider lives in `src/common/providers/theme-provider/`. Never hard-code colors.
+
+```ts
+import { useTheme } from "@/common/theme";
+const theme = useTheme().colorTheme;
+// theme.white, theme.black, theme.text01, …
+```
+
+Test new screens in light **and** dark, and set background colors on loading states — missing those caused dark-mode flicker on the account picker screen.
+
+### Translations — `useTranslations()`, not `i18n.t()` directly
+
+`i18n.t("key")` does not re-render when the locale changes. The hook subscribes to `localeVar`:
+
+```ts
+import { useTranslations } from "@/common/hooks/use-translations";
+const { t } = useTranslations();
+// t("key")
+```
+
+When adding a string, add the key to the English file under `src/translations/` (the base). Other locales extend and override as needed.
+
+### Reactive variables for global state
+
+```ts
 import { useReactiveVar } from "@apollo/client";
 import { themeVar } from "@/common/vars";
 const currentTheme = useReactiveVar(themeVar);
 ```
 
-### Using Translations (Reactive)
+### Generated GraphQL
 
-```typescript
-import { useTranslations } from "@/common/hooks/use-translations";
-const { t } = useTranslations();
-// Use t("key") instead of i18n.t("key") for reactive translations
-```
+`src/generated-graphql/` is produced by `yarn codegen` (config in `codegen.ts`, `apollo.config.json`) and ignored by ESLint. Re-run codegen after schema changes; never hand-edit.
 
-### Screen Structure
+### Screens
 
-Most screens follow this pattern:
+Screens live in `src/screens/<name>/` and are mounted from a route file under `app/`. Use `SafeAreaView` for spacing and add analytics tracking on mount where applicable.
 
-- Import theme and utilities
-- Use analytics tracking on mount
-- Apply theme-aware styling
-- Use SafeAreaView for proper spacing
+## Configuration files
 
-### Navigation
+- `app.json` — Expo config; **app version lives here** (and in `package.json`).
+- `eas.json` — EAS Build/Submit profiles.
+- `apollo.config.json`, `codegen.ts` — GraphQL codegen.
+- `babel.config.js`, `tsconfig.json`, `eslint.config.js` — standard.
 
-- Uses Expo Router with file-based routing
-- Stack navigation with theme-aware headers
-- Screens in `app/` directory map to routes
+## CI / Deploy
 
-## Recent Changes
+- CI (`.github/workflows/ci.yml`) runs `yarn lint`, `yarn typecheck`, `yarn test:unit` on push/PR to `main`.
+- Deploy (`.github/workflows/deploy.yml`) triggers EAS build/submit when `mobile/package.json`'s `version` changes on `main`. Use `yarn bump` to bump.
 
-### Theme System Enhancement
-
-- Added "system" option to follow device appearance
-- Theme provider now listens for system appearance changes
-- Settings screen uses picker instead of switch for theme selection
-- Default theme changed from "light" to "system"
-
-### Internationalization Expansion
-
-- Extended support from 4 to 13 languages
-- Added translations for: Bulgarian, Catalan, German, Persian, Dutch, Portuguese, Russian, Slovak, Ukrainian
-- Updated language selector in settings to include all new locales
-- All new translations extend English base with language-specific overrides
-
-### Bug Fixes
-
-- Fixed account picker screen flickering in dark mode by adding proper background colors
-- Fixed version display in settings by using `Constants.expoConfig?.version`
-- Removed unnecessary arrow from version display (non-clickable item)
-- Fixed typo: "Locatization" → "Localization" in translations index
-
-### Language Switching Reactivity Fix
-
-- **Problem**: Components using `i18n.t()` directly weren't updating when language changed
-- **Solution**: Created `useTranslations()` hook that uses reactive variables
-- **Fixed Components**: Home screen, Settings, Auth screens, Add Transaction, Referral, Charts
-- **Implementation**: Hook listens to `localeVar` changes and triggers re-renders automatically
-- **Usage**: Replace `i18n.t("key")` with `const { t } = useTranslations(); t("key")`
-
-## Development Notes
-
-- Always use theme-aware colors (`theme.white`, `theme.black`, etc.)
-- **Always use `useTranslations()` hook instead of `i18n.t()` for reactive translations**
-- Follow existing component patterns when creating new UI
-- Add proper TypeScript types
-- Use existing translation keys or add new ones to all language files
-- Test in both light and dark themes
-- Ensure proper background colors for loading states
-- Test language switching to verify translations update instantly
-- **For temporary files**: Use the `/tmp` directory at the repository root (gitignored) for any temporary files, scripts, or artifacts needed during development
-
-## Repository Info
-
-- Original repo: `stargately/beancount-mobile`
-- Uses GitHub Actions for CI/CD (lint workflow)
-- MIT licensed
+## Repo
+- Origin: `stargately/beancount-mobile`, now part of the `beancount-mobile` monorepo.
+- License: MIT.

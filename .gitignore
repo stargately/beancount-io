@@ -1,0 +1,36 @@
+# Repo-wide ignores. Per-package ignores live in <package>/.gitignore.
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editors / IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Environment files — NEVER commit secrets
+.env
+.env.local
+.env.*.local
+
+# Logs
+*.log
+logs/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Caches
+.eslintcache
+.cache/
+
+# Build / dependency artifacts.
+# These belong inside packages (e.g. mobile/node_modules), never at the repo root.
+node_modules/
+dist/
+.expo/
+
+# AI agent scratch (Claude Code, GitHub Copilot, etc.)
+tmp/
