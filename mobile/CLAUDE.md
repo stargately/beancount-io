@@ -112,5 +112,5 @@ Screens live in `src/screens/<name>/` and are mounted from a route file under `a
 - Deploy (`.github/workflows/deploy.yml`) triggers EAS build/submit when `mobile/package.json`'s `version` changes on `main`. Use `yarn bump` to bump.
 
 ## Repo
-- Origin: `stargately/beancount-mobile`, now part of the `beancount-mobile` monorepo.
+- Origin: `stargately/beancount-mobile`, now part of the `stargately/beancount-io` monorepo.
 - License: MIT.
