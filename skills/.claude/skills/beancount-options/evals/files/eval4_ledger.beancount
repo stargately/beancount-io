@@ -1,0 +1,13 @@
+;; Personal beancount ledger
+;; Test fixture for beancount-options skill — eval 4 (multi-leg vertical open)
+
+2026-01-01 open Assets:Brokerage:Robinhood:Cash USD
+2026-01-01 open Assets:Brokerage:Robinhood:Options
+2026-01-01 open Assets:Brokerage:Robinhood:Stock
+2026-01-01 open Income:Trading:OptionPremium USD
+2026-01-01 open Expenses:Trading:Fees USD
+2026-01-01 open Equity:Opening-Balances
+
+2026-01-01 * "Initial deposit"
+  Assets:Brokerage:Robinhood:Cash      30000.00 USD
+  Equity:Opening-Balances

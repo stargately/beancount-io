@@ -1,0 +1,25 @@
+;; Personal beancount ledger
+;; Test fixture for beancount-options skill — eval 7 (long put exercised)
+;; Has prior stock holding and an open long protective put.
+
+2026-01-01 open Assets:Brokerage:Robinhood:Cash USD
+2026-01-01 open Assets:Brokerage:Robinhood:Options
+2026-01-01 open Assets:Brokerage:Robinhood:Stock
+2026-01-01 open Income:Trading:OptionPremium USD
+2026-01-01 open Income:Trading:CapitalGains USD
+2026-01-01 open Expenses:Trading:Fees USD
+2026-01-01 open Equity:Opening-Balances
+
+2026-01-01 * "Initial deposit"
+  Assets:Brokerage:Robinhood:Cash      30000.00 USD
+  Equity:Opening-Balances
+
+2026-01-15 * "BUY 100 AAPL @ 145"
+  Assets:Brokerage:Robinhood:Cash       -14500.65 USD
+  Assets:Brokerage:Robinhood:Stock        100 AAPL {145.00 USD}
+  Expenses:Trading:Fees                       0.65 USD
+
+2026-04-01 * "BTO AAPL 140P 5/1 (protective)" ^aapl-140p-20260501-long
+  Assets:Brokerage:Robinhood:Cash         -150.65 USD
+  Assets:Brokerage:Robinhood:Options       1 AAPL_PUT_20260501_00140000 {150.00 USD}
+  Expenses:Trading:Fees                     0.65 USD

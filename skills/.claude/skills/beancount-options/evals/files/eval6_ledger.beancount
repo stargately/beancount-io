@@ -1,0 +1,25 @@
+;; Personal beancount ledger
+;; Test fixture for beancount-options skill — eval 6 (covered call assigned)
+;; Has prior stock holding and an open covered call.
+
+2026-01-01 open Assets:Brokerage:Robinhood:Cash USD
+2026-01-01 open Assets:Brokerage:Robinhood:Options
+2026-01-01 open Assets:Brokerage:Robinhood:Stock
+2026-01-01 open Income:Trading:OptionPremium USD
+2026-01-01 open Income:Trading:CapitalGains USD
+2026-01-01 open Expenses:Trading:Fees USD
+2026-01-01 open Equity:Opening-Balances
+
+2026-01-01 * "Initial deposit"
+  Assets:Brokerage:Robinhood:Cash      100000.00 USD
+  Equity:Opening-Balances
+
+2026-01-15 * "BUY 100 SPY @ 470"
+  Assets:Brokerage:Robinhood:Cash       -47000.65 USD
+  Assets:Brokerage:Robinhood:Stock        100 SPY {470.00 USD}
+  Expenses:Trading:Fees                       0.65 USD
+
+2026-04-01 * "STO SPY 500C 5/1 (covered)" ^spy-500c-20260501
+  Assets:Brokerage:Robinhood:Cash         149.35 USD
+  Assets:Brokerage:Robinhood:Options    -1 SPY_CALL_20260501_00500000 {150.00 USD}
+  Expenses:Trading:Fees                     0.65 USD

@@ -1,0 +1,10 @@
+;; Personal beancount ledger
+;; Test fixture for beancount-options skill — eval 1 (CSP open, no prior options)
+
+2026-01-01 open Assets:Brokerage:Robinhood:Cash USD
+2026-01-01 open Assets:Brokerage:Robinhood:Stock
+2026-01-01 open Equity:Opening-Balances
+
+2026-01-01 * "Initial deposit"
+  Assets:Brokerage:Robinhood:Cash      30000.00 USD
+  Equity:Opening-Balances

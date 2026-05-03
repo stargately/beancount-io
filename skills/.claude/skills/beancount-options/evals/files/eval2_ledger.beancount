@@ -1,0 +1,19 @@
+;; Personal beancount ledger
+;; Test fixture for beancount-options skill — eval 2 (assignment, prior STO present)
+
+2026-01-01 open Assets:Brokerage:Robinhood:Cash USD
+2026-01-01 open Assets:Brokerage:Robinhood:Options
+2026-01-01 open Assets:Brokerage:Robinhood:Stock
+2026-01-01 open Income:Trading:OptionPremium USD
+2026-01-01 open Income:Trading:CapitalGains USD
+2026-01-01 open Expenses:Trading:Fees USD
+2026-01-01 open Equity:Opening-Balances
+
+2026-01-01 * "Initial deposit"
+  Assets:Brokerage:Robinhood:Cash      60000.00 USD
+  Equity:Opening-Balances
+
+2026-04-01 * "STO SPY 480P 5/1" ^spy-480p-20260501
+  Assets:Brokerage:Robinhood:Cash                              209.35 USD
+  Assets:Brokerage:Robinhood:Options    -1 SPY_PUT_20260501_00480000 {210.00 USD}
+  Expenses:Trading:Fees                                          0.65 USD
